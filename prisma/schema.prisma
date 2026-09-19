@@ -1,0 +1,312 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  name          String?
+  role          String   @default("EMPLOYEE")
+  organizationId String?
+  isActive      Boolean  @default(true)
+  emailVerified Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Organization {
+  id                String   @id @default(cuid())
+  name              String
+  slug              String   @unique
+  industry          String?
+  companySize       String?  @map("company_size")
+  country           String?
+  website           String?
+  planId            String?
+  subscriptionStatus String   @default("TRIALING") @map("subscription_status")
+  settings          Json     @default("{}")
+  isActive          Boolean  @default(true)
+  isDeleted         Boolean  @default(false)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String   @id @default(cuid())
+  userId         String
+  organizationId String
+  role           String
+  department     String?
+  isActive       Boolean  @default(true)
+  invitedBy      String?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  userIdStr      String
+  orgIdStr      String
+
+  @@unique([userId, organizationId])
+  @@index([userIdStr])
+  @@index([orgIdStr])
+  @@map("organization_members")
+}
+
+model SubscriptionPlan {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  monthlyPrice  Float?
+  yearlyPrice   Float?
+  features      Json     @default("[]")
+  maxEmployees  Int      @default(5) @map("max_employees")
+  maxProjects   Int      @default(10) @map("max_projects")
+  maxClients    Int      @default(20) @map("max_clients")
+  maxStorage    Int      @default(1024) @map("max_storage")
+  isActive      Boolean  @default(true)
+  isDefault     Boolean  @default(false) @map("is_default")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("subscription_plans")
+}
+
+model Subscription {
+  id                 String   @id @default(cuid())
+  organizationId     String
+  planId             String
+  status             String   @default("TRIALING")
+  currentPeriodStart DateTime? @map("current_period_start")
+  currentPeriodEnd   DateTime? @map("current_period_end")
+  cancelAtPeriodEnd  Boolean  @default(false) @map("cancel_at_period_end")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@map("subscriptions")
+}
+
+model Invoice {
+  id             String   @id @default(cuid())
+  organizationId String
+  subscriptionId String?
+  amount         Float
+  currency       String   @default("USD")
+  status         String   @default("PENDING")
+  dueDate        DateTime
+  paidAt         DateTime?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("invoices")
+}
+
+model PaymentEvent {
+  id             String   @id @default(cuid())
+  invoiceId      String
+  organizationId String
+  amount         Float
+  currency       String   @default("USD")
+  provider       String?
+  referenceId    String?
+  status         String   @default("PENDING")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("payment_events")
+}
+
+model Project {
+  id              String   @id @default(cuid())
+  organizationId  String
+  name            String
+  description     String?
+  status          String   @default("PLANNING")
+  startDate       DateTime? @map("start_date")
+  deadline        DateTime?
+  budget          Float?
+  projectManagerId String? @map("project_manager_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("projects")
+}
+
+model Task {
+  id              String   @id @default(cuid())
+  projectId       String
+  title           String
+  description     String?
+  status          String   @default("TODO")
+  priority        String   @default("MEDIUM")
+  assigneeId      String?
+  dueDate         DateTime?
+  points          Int?     @default(0)
+  timeLogged      Float    @default(0) @map("time_logged")
+  order           Int      @default(0)
+  isDeleted       Boolean  @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("tasks")
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("task_comments")
+}
+
+model TimeEntry {
+  id             String   @id @default(cuid())
+  taskId         String?
+  projectId      String?
+  employeeId     String
+  organizationId String
+  startTime      DateTime @map("start_time")
+  endTime        DateTime?
+  duration       Float?   @default(0)
+  date           DateTime
+  timezone       String   @default("UTC")
+  description    String?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("time_entries")
+}
+
+model Client {
+  id               String   @id @default(cuid())
+  organizationId   String
+  name             String
+  email            String?
+  phone            String?
+  company          String?
+  status           String   @default("LEAD")
+  assignedManagerId String?
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("clients")
+}
+
+model Service {
+  id            String   @id @default(cuid())
+  organizationId String
+  name          String
+  description   String?
+  pricingModel  String   @default("FIXED")
+  duration      String?
+  status        String   @default("DRAFT")
+  category      String?
+  price         Float    @default(0)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("services")
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  organizationId String
+  name          String
+  sku           String?
+  description   String?
+  price         Float    @default(0)
+  inventory     Int      @default(0)
+  status        String   @default("DRAFT")
+  images        Json     @default("[]")
+  category      String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("products")
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  organizationId String
+  userId        String
+  action        String
+  entity        String?
+  entityId      String?
+  metadata      Json     @default("{}")
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}
+
+model Notification {
+  id             String   @id @default(cuid())
+  userId         String
+  organizationId String?
+  type           String
+  title          String
+  content        String
+  isRead         Boolean  @default(false)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("notifications")
+}
+
+model VPNConfiguration {
+  id              String   @id @default(cuid())
+  organizationId  String
+  config          Json     @default("{}")
+  isActive        Boolean  @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("vpn_configurations")
+}
+
+model DeviceAuthorization {
+  id            String   @id @default(cuid())
+  organizationId String
+  userId        String
+  deviceInfo    Json     @default("{}")
+  token         String   @unique
+  expiresAt     DateTime @map("expires_at")
+  isRevoked     Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("device_authorizations")
+}
+
+model AccessPolicy {
+  id             String   @id @default(cuid())
+  organizationId String
+  resource       String
+  action         String
+  roles          Json     @default("[]")
+  isAllowed      Boolean  @default(false)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("access_policies")
+}
+
+model BrowserExtensionSession {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  deviceId       String
+  connectedAt    DateTime @map("connected_at")
+  lastActivityAt DateTime @map("last_activity_at")
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at")
+  vpnConfigId    String?
+  @@map("browser_extension_sessions")
+}

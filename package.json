@@ -2,9 +2,6 @@
   "name": "worksphere",
   "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "shared"
-  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,14 +10,18 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "db:types": "supabase gen types typescript --linked > lib/supabase/database.types.ts",
-    "db:types:local": "supabase gen types typescript --local > lib/supabase/database.types.ts",
-    "db:start": "npx supabase start",
-    "db:reset": "npx supabase db reset"
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset --force-reset",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.12.4",
-    "@supabase/supabase-js": "^2.112.2",
+    "@prisma/client": "^6.18.0",
+    "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
@@ -48,8 +49,9 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "playwright": "^1.62.1",
-    "supabase": "^2.112.0",
+    "prisma": "^6.18.0",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.19.0",
     "typescript": "^5",
     "vitest": "^4.1.10"
   }
