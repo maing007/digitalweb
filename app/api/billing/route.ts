@@ -6,7 +6,7 @@ export async function GET() {
   try {
     const tenantId = await getTenantId();
     if (!tenantId) throw new AppError("UNAUTHORIZED");
-    const invoices = await prisma.invoice.findMany({ where: { organizationId: tenantId }, orderBy: { createdAt: "desc" } });
+    const invoices = await prisma.invoice.findMany({ where: { organizationId: tenantId }, orderBy: { createdAt: "desc" as const } });
     return NextResponse.json({ data: invoices });
   } catch (err) {
     return NextResponse.json(toApiResult(err), { status: err instanceof AppError ? err.status : 500 });

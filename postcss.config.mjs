@@ -1,3 +1,7 @@
-import { nextPostcssConfig } from "@next/postcss";
+const config = {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
+};
 
-export default nextPostcssConfig();
+export default config;
