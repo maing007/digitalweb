@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { AppError, toApiResult } from "@/lib/errors";
-import { ROLES } from "@/lib/rbac";
 
 export async function GET() {
   try {
     const tenantId = await getTenantId();
     if (!tenantId) throw new AppError("UNAUTHORIZED");
 
-    const employees = await prisma.organizationMember.findMany({
-      where: { organizationId: tenantId, isActive: true },
-      include: { user: true },
+    const timeEntries = await prisma.timeEntry.findMany({
+      where: { organizationId: tenantId },
+      include: { task: true, employee: true },
+      orderBy: { startTime: "desc" },
     });
-    return NextResponse.json({ data: employees });
+    return NextResponse.json({ data: timeEntries });
   } catch (err) {
     return NextResponse.json(toApiResult(err), { status: err instanceof AppError ? err.status : 500 });
   }
@@ -24,16 +24,19 @@ export async function POST(request: Request) {
     const tenantId = await getTenantId();
     if (!tenantId) throw new AppError("UNAUTHORIZED");
 
-    const member = await prisma.organizationMember.create({
+    const entry = await prisma.timeEntry.create({
       data: {
         id: crypto.randomUUID(),
-        userId: body.userId || crypto.randomUUID(),
+        taskId: body.taskId,
+        projectId: body.projectId,
+        employeeId: body.employeeId,
         organizationId: tenantId,
-        role: body.role || ROLES.EMPLOYEE,
-        department: body.department,
+        startTime: body.startTime || new Date(),
+        description: body.description,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       },
     });
-    return NextResponse.json({ data: member }, { status: 201 });
+    return NextResponse.json({ data: entry }, { status: 201 });
   } catch (err) {
     return NextResponse.json(toApiResult(err), { status: err instanceof AppError ? err.status : 500 });
   }
