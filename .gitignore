@@ -38,3 +38,6 @@ coverage/
 # Misc
 *.temp
 *.bak
+node_modules/
+.next/
+coverage/
