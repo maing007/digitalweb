@@ -1,6 +1,12 @@
 # Dependencies
 node_modules/
 
+# Build output
+.next/
+out/
+build/
+dist/
+
 # Environment
 .env
 .env.local
@@ -17,23 +23,17 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-# Build output
-dist/
-build/
-.next/
-out/
-
 # Logs
 *.log
 npm-debug.log*
+
+# Test coverage
+coverage/
 
 # Secrets
 *.pem
 *.key
 *.secret
-
-# Test coverage
-coverage/
 
 # Misc
 *.temp

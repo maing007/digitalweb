@@ -1,0 +1,8 @@
+{
+  "android": {
+    "package": "com.techinovates.worksphere"
+  },
+  "ios": {
+    "bundleIdentifier": "com.techinovates.worksphere"
+  }
+}

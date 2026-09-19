@@ -1,0 +1,43 @@
+openapi: 3.0.3
+info:
+  title: WorkSphere API
+  version: 1.0.0
+  description: Multi-tenant company management SaaS API by Techinovates
+servers:
+  - url: /api
+    description: Versioned API
+paths:
+  /auth/me:
+    get:
+      summary: Get current user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user
+  /tenants:
+    get:
+      summary: Get tenant
+      security:
+        - bearerAuth: []
+    post:
+      summary: Create tenant
+      security:
+        - bearerAuth: []
+  /employees:
+    get:
+      summary: Get employees
+    post:
+      summary: Create employee
+  /performance:
+    get:
+      summary: Get performance reviews
+  /vpn:
+    get:
+      summary: Get VPN access configs
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: access_token
